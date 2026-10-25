@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from pathlib import Path
 from PIL import Image
 
 
@@ -42,29 +43,19 @@ def main():
         description="Posterize an image for art or linocut."
     )
     parser.add_argument("input", help="Input image path")
-    parser.add_argument("output", help="Output image path")
-    parser.add_argument(
-        "-l", "--levels", type=int, default=4,
-        help="Number of intensity levels (2-256, default: 4)"
-    )
-    parser.add_argument(
-        "--gray", action="store_true",
-        help="Convert the image to grayscale"
-    )
 
     args = parser.parse_args()
-
-    if not 2 <= args.levels <= 256:
-        parser.error("Levels must be between 2 and 256.")
+    input_path = Path(args.input)
+    output_path = input_path.with_name(f"{input_path.stem}_posterized.png")
 
     try:
-        with Image.open(args.input) as source:
+        with Image.open(input_path) as source:
             image = source.copy()
 
-        result = posterize(image, args.levels, args.gray)
-        result.save(args.output)
+        result = posterize(image, levels=2, grayscale=True)
+        result.save(output_path)
 
-        print(f"Saved posterized image to {args.output}")
+        print(f"Saved posterized image to {output_path}")
 
     except (OSError, ValueError) as error:
         parser.error(str(error))
